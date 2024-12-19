@@ -1,7 +1,8 @@
-package com.employee.service;
+package com.employee.service.impl;
 
 import com.employee.model.Employees;
 import com.employee.repository.EmployeesRepository;
+import com.employee.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -10,12 +11,14 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class EmployeeServiceImpl implements EmployeeService{
+public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeesRepository employeeRepository;
 
     @Override
     public Employees createEmployee(Employees employee) {
+        Employees emp = new Employees();
+        emp.setName(employee.getName());
         return employeeRepository.save(employee);
     }
 
