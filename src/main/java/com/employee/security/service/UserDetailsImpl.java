@@ -30,15 +30,15 @@ public class UserDetailsImpl implements UserDetails {
     private Collection<? extends GrantedAuthority> authorities;
 
     public static UserDetailsImpl build(User user) {
-        GrantedAuthority authority = new SimpleGrantedAuthority(user.getRole().toString());
-
+        String authority = user.getRole().getRoleName().toString();
+        System.out.println("Assigned Authority: " + authority);
         return new UserDetailsImpl(
                 user.getUserId(),
                 user.getUserName(),
                 user.getEmail(),
                 user.getPassword(),
                 user.isTwoFactorEnabled(),
-                List.of(authority)
+                List.of(new SimpleGrantedAuthority(authority))
         );
     }
 
