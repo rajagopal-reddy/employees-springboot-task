@@ -2,8 +2,8 @@ package com.secure.user.service;
 
 import com.secure.user.dto.UserDto;
 import com.secure.user.enums.AppRole;
-import com.secure.user.exception.UserAlreadyExistsException;
-import com.secure.user.exception.UserNotFoundException;
+import com.secure.user.exception.ResourceAlreadyExistsException;
+import com.secure.user.exception.ResourceNotFoundException;
 import com.secure.user.model.Role;
 import com.secure.user.model.User;
 import com.secure.user.repository.RoleRepository;
@@ -41,10 +41,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto createUser(User user) {
         if (userRepository.existsByUserName(user.getUserName())) {
-            throw new UserAlreadyExistsException("User with username " + user.getUserName() + " already exists.");
+            throw new ResourceAlreadyExistsException("User with username " + user.getUserName() + " already exists.");
         }
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new UserAlreadyExistsException("User with email " + user.getEmail() + " already exists.");
+            throw new ResourceAlreadyExistsException("User with email " + user.getEmail() + " already exists.");
         }
 
         if (user.getRole() == null) {
@@ -59,14 +59,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUserRole(Long userId, String roleName,User updatedUser) {
         User existingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         if (!existingUser.getUserName().equals(updatedUser.getUserName()) && userRepository.existsByUserName(updatedUser.getUserName())) {
-            throw new UserAlreadyExistsException("User with username " + updatedUser.getUserName() + " already exists.");
+            throw new ResourceAlreadyExistsException("User with username " + updatedUser.getUserName() + " already exists.");
         }
 
         if (!existingUser.getEmail().equals(updatedUser.getEmail()) && userRepository.existsByEmail(updatedUser.getEmail())) {
-            throw new UserAlreadyExistsException("User with email " + updatedUser.getEmail() + " already exists.");
+            throw new ResourceAlreadyExistsException("User with email " + updatedUser.getEmail() + " already exists.");
         }
 
         existingUser.setUserName(updatedUser.getUserName());
@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
         userRepository.delete(user);
     }
 

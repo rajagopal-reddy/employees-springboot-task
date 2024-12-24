@@ -1,15 +1,14 @@
 package com.secure.user.controller;
 
 import com.secure.user.dto.UserDto;
-import com.secure.user.exception.UserAlreadyExistsException;
-import com.secure.user.exception.UserNotFoundException;
+import com.secure.user.exception.ResourceAlreadyExistsException;
+import com.secure.user.exception.ResourceNotFoundException;
 import com.secure.user.model.User;
 import com.secure.user.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,7 +36,7 @@ public class UserController {
         try {
             UserDto createdUser = userService.createUser(user);
             return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
-        } catch (UserAlreadyExistsException e) {
+        } catch (ResourceAlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
     }
@@ -49,7 +48,7 @@ public class UserController {
         try {
             userService.updateUserRole(userId, roleName, updatedUser);
             return ResponseEntity.ok("User role updated successfully");
-        } catch (UserNotFoundException | IllegalArgumentException e) {
+        } catch (ResourceNotFoundException | IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
@@ -59,7 +58,7 @@ public class UserController {
         try {
             userService.deleteUser(id);
             return ResponseEntity.ok("User deleted successfully");
-        } catch (UserNotFoundException e) {
+        } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
