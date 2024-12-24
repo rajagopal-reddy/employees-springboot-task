@@ -1,8 +1,11 @@
 package com.secure.user.controller;
 
 import com.secure.user.dto.UserDto;
+import com.secure.user.exception.UserAlreadyExistsException;
+import com.secure.user.exception.UserNotFoundException;
 import com.secure.user.model.User;
 import com.secure.user.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +23,8 @@ public class UserController {
 
     @GetMapping("/get-users")
     public ResponseEntity<List<User>> getAllUsers() {
-        return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
-    }
-
-    @PostMapping("/update-role")
-    public ResponseEntity<String> updateUserRole(@RequestParam Long userId,
-                                                 @RequestParam String roleName) {
-        userService.updateUserRole(userId, roleName);
-        return ResponseEntity.ok("User role updated");
+        List<User> users = userService.getAllUsers();
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @GetMapping("/user/{id}")
@@ -35,11 +32,35 @@ public class UserController {
         return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
     }
 
-    @GetMapping("/debug")
-    public ResponseEntity<?> debugAuthentication(Authentication authentication) {
-        if (authentication == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No Authentication Found");
+    @PostMapping("/create-user")
+    public ResponseEntity<UserDto> createUser(@Valid @RequestBody User user) {
+        try {
+            UserDto createdUser = userService.createUser(user);
+            return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+        } catch (UserAlreadyExistsException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
-        return ResponseEntity.ok(authentication.getAuthorities());
+    }
+
+    @PutMapping("/update-role")
+    public ResponseEntity<String> updateUser(@RequestParam Long userId,
+                                             @RequestParam String roleName,
+                                             @RequestBody User updatedUser) {
+        try {
+            userService.updateUserRole(userId, roleName, updatedUser);
+            return ResponseEntity.ok("User role updated successfully");
+        } catch (UserNotFoundException | IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete-user/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+        try {
+            userService.deleteUser(id);
+            return ResponseEntity.ok("User deleted successfully");
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 }
